@@ -274,10 +274,3 @@ def compare_tuned_and_baseline_models(X_val, y_val, log_reg_pipe,xgb_model,lgbm_
     df = pd.DataFrame(results)
 
     return df
-
-
-
-
-
-
-
