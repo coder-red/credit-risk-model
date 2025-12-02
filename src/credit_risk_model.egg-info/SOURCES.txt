@@ -7,7 +7,6 @@ src/credit_risk_model/data_cleaning.py
 src/credit_risk_model/data_ingestion.py
 src/credit_risk_model/feat_eng.py
 src/credit_risk_model/model.py
-src/credit_risk_model/utils.py
 src/credit_risk_model.egg-info/PKG-INFO
 src/credit_risk_model.egg-info/SOURCES.txt
 src/credit_risk_model.egg-info/dependency_links.txt

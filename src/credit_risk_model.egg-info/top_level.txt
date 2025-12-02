@@ -1,4 +1,1 @@
 credit_risk_model
-data
-models
-results

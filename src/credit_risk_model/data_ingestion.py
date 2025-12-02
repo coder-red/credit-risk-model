@@ -1,6 +1,6 @@
 import duckdb
 from pathlib import Path
-from credit_risk_model.config import DATA_RAW, DATA_SAMPLE, CSV_FILES, DB_PATH
+from config import DATA_RAW, DATA_SAMPLE, CSV_FILES, DB_PATH
 
 
 def get_csv_path(filename):
