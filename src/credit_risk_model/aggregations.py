@@ -1,7 +1,7 @@
 import duckdb
 
-# Aggregate bureau_balance
 def get_agg_bureau_balance(con):
+    "Aggregate bureau_balance"
     con.execute("""
      CREATE OR REPLACE TABLE agg_bureau_balance AS
         SELECT 
@@ -18,8 +18,8 @@ def get_agg_bureau_balance(con):
     print("created agg_bureau_balance table")
 
 
-# Join bureau with aggregated balance
-def get_join_bureau_df(con):    
+def get_join_bureau_df(con):   
+    "Join bureau with aggregated balance" 
     con.execute("""
         CREATE OR REPLACE TABLE join_bureau_df AS
         SELECT 
@@ -39,6 +39,7 @@ def get_join_bureau_df(con):
     print("created join_bureau_df table")
 
 def get_credit_card_balance(con):
+    "aggregate credit card balance"
     con.execute("""
     CREATE OR REPLACE TABLE agg_credit_card_balance AS
     SELECT 
@@ -52,6 +53,7 @@ def get_credit_card_balance(con):
     print("created agg_credit_card_balance table")
 
 def get_previous_application(con):
+    "agregate previous application"
     con.execute("""
     CREATE OR REPLACE TABLE agg_previous_application AS
     SELECT 
@@ -69,6 +71,7 @@ def get_previous_application(con):
     print("created agg_previous_application table")
 
 def get_installments_payments(con):
+    "aggregate intallments payments"
     con.execute("""
         CREATE OR REPLACE TABLE agg_installments_payments AS
         SELECT
@@ -82,6 +85,7 @@ def get_installments_payments(con):
 
 
 def get_pos_cash_balance(con):
+        "aggregate pos cash balance"
         con.execute("""
         CREATE OR REPLACE TABLE agg_pos_cash_balance AS
         SELECT
@@ -95,6 +99,7 @@ def get_pos_cash_balance(con):
         print("created agg_pos_cash_balance table")
 
 def get_agg_application_train(con):
+    "aggregate application train"
     con.execute("""
     CREATE OR REPLACE TABLE agg_application_train AS               
     SELECT 
@@ -115,6 +120,7 @@ def get_agg_application_train(con):
     print("created agg_application_train table")
 
 def get_agg_main(con):
+        "join with application train"
         con.execute("""
         CREATE OR REPLACE TABLE agg_main AS
         SELECT 
@@ -136,6 +142,7 @@ def get_agg_main(con):
 
 # Execute all aggregation functions in order
 def run_all_aggregations(con):
+    "run all"
     get_agg_bureau_balance(con)
     get_join_bureau_df(con)
     get_credit_card_balance(con)
