@@ -1,5 +1,5 @@
 ![banner]<p align="center">
-  <img src="assets/credit_risk_img.jpg" alt="Project Banner" width="100%">
+  <img src="assets/credit_risk_img.jpg" alt="Project Banner" width="50%">
 </p>
 
 
