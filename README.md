@@ -63,7 +63,7 @@ This model predicts if a borrower will pay back a loan or not. Lending instituti
 
 Target distribution between the features.
 
-![Bar chart](assets\target_dist.png)
+![Bar chart](assets/target_dist.png)
 
 Summary bar of major features
 
@@ -86,7 +86,7 @@ Top 3 models (with default parameters)
 | Logistic Regression  | 69.80% 	            |
 
 
-- ***The final model used is: XGboost***
+- ***The final model used is: LightGBM***
 - ***Metrics used: Recall, AUC-ROC, AUC-PR, Precision,	F1-score, KS, Gini***
 
 
