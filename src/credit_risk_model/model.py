@@ -259,7 +259,7 @@ def hyperparameter_tuning_lightgbm(X_train, y_train, X_val, y_val):
 
 
 
-def compare_tuned_and_baseline_models(X_val, y_val, log_reg_pipe, xgb_model, lgbm_model, xgb_tuned, lgbm_tuned):
+def compare_tuned_and_baseline_models(X_val, y_val, xgb_model, lgbm_model, xgb_tuned, lgbm_tuned):
     """Compare baseline and tuned models side by side."""
     
     def ks_statistic(y_true, y_proba):
@@ -269,7 +269,6 @@ def compare_tuned_and_baseline_models(X_val, y_val, log_reg_pipe, xgb_model, lgb
         return max(tpr - fpr)
     
     models = {
-        "Logistic Regression": log_reg_pipe,
         "XGBoost Baseline": xgb_model,
         "XGBoost Tuned": xgb_tuned,
         "LightGBM Baseline": lgbm_model,
