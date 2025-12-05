@@ -59,18 +59,48 @@ This model predicts if a borrower will pay back a loan or not. Lending instituti
 - Optuna (Hyperparameter tuning) 
 
 
+## Quick glance at the results
+
+Target distribution between the features.
+
+![Bar chart](assets\target_dist.png)
+
+Summary bar of major features
+
+![Bar chart](assets/shap_summary_bar.png)
+
+Confusion matrix of LightGBM.
+
+![Confusion matrix](assets/confusion_matrix_lgbm_tuned.png)
+
+ROC curve of LightGBM.
+
+![ROC curve](assets/roc_curve.png)
+
+Top 3 models (with default parameters)
+
+| Model     	         |    AUC-ROC score     |
+|----------------------|----------------------|
+| LightGBM(tuned)      | 72.57% 	            |
+| XGboost  (tuned)     | 72.42% 	            |
+| Logistic Regression  | 69.80% 	            |
+
+
+- ***The final model used is: XGboost***
+- ***Metrics used: Recall, AUC-ROC, AUC-PR, Precision,	F1-score, KS, Gini***
+
+
+### Model Evaluation Strategy
+
+**Primary Metric: ROC-AUC**
+Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how well the model does in separating defaulters from non defaulters.
+
+**Supporting Metrics: Precision, Recall, F1**
+- **Recall** is critical as missing a high-risk borrower leads to real financial loss.
+- **Precision** helps ensure we don’t wrongly reject too many good borrowers.
+- **F1** balances both.
+
+This combination gives a realistic view of how the model performs in a real lending environment.
 
 
 
-
-Python – for data processing, modeling, and analysis (see requirements.txt for exact packages)
-
-
-
-Pandas & NumPy – for data manipulation
-
-Matplotlib & Seaborn – for data visualization and exploratory analysis
-
-– for model explainability
-
- – for saving and versioning models
