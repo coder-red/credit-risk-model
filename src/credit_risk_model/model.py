@@ -3,6 +3,7 @@ import numpy as np
 # Import necessary libraries for modelling
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
+import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer
@@ -12,6 +13,7 @@ from sklearn.metrics import (
     roc_auc_score, 
     precision_recall_curve, 
     auc,
+    average_precision_score,
     precision_score,
     recall_score,
     f1_score,
@@ -141,27 +143,38 @@ def compare_models(X_val, y_val, log_reg_pipe, xgb_model, lgbm_model):
 
     return results_df
 
-
 def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
-    """Hyperparameter tuning for XGBoost using Optuna."""
+    """Hyperparameter tuning for XGBoost using Optuna (correct for XGBoost 3.x)."""
+
+    n_neg = (y_train == 0).sum()
+    n_pos = (y_train == 1).sum()
+    scale_pos_weight = (n_neg / n_pos) * 2
+
     def objective(trial):
         params = {
-            "n_estimators": trial.suggest_int("n_estimators", 200, 800),
-            "max_depth": trial.suggest_int("max_depth", 3, 10),
+            "n_estimators": trial.suggest_int("n_estimators", 300, 900),
+            "max_depth": trial.suggest_int("max_depth", 3, 8),
             "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2, log=True),
             "subsample": trial.suggest_float("subsample", 0.6, 1.0),
             "colsample_bytree": trial.suggest_float("colsample_bytree", 0.6, 1.0),
-            "gamma": trial.suggest_float("gamma", 0, 5),
-            "min_child_weight": trial.suggest_int("min_child_weight", 1, 10),
+            "gamma": trial.suggest_float("gamma", 0, 10),
+            "min_child_weight": trial.suggest_int("min_child_weight", 1, 12),
+            "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 5.0),
+            "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 5.0),
+            "scale_pos_weight": scale_pos_weight,
             "random_state": 42,
             "eval_metric": "auc",
-            "tree_method": "hist"   
+            "tree_method": "hist",
+
+            # ✔ correct: early stopping inside constructor (XGB 3.x)
+            "early_stopping_rounds": 50,
         }
 
         model = XGBClassifier(**params)
 
         model.fit(
-            X_train, y_train,
+            X_train,
+            y_train,
             eval_set=[(X_val, y_val)],
             verbose=False
         )
@@ -169,26 +182,25 @@ def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
         preds = model.predict_proba(X_val)[:, 1]
         return roc_auc_score(y_val, preds)
 
-    # Run Optuna study
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=40)  
+    study.optimize(objective, n_trials=40)
 
-    # Get best parameters
     best_params = study.best_params
-    best_params
 
-    # Train final model with best parameters
-    xgb_tuned = XGBClassifier(
-        **best_params,
-        random_state=42,
-        eval_metric="auc",
-        tree_method="hist"
+    # ❗ FIX: put early stopping back for final training
+    best_params["early_stopping_rounds"] = 50
+    best_params["eval_metric"] = "auc"
+    best_params["tree_method"] = "hist"
+    best_params["random_state"] = 42
+
+    xgb_tuned = XGBClassifier(**best_params)
+
+    xgb_tuned.fit(
+        X_train,
+        y_train,
+        eval_set=[(X_val, y_val)],
+        verbose=False
     )
-
-    xgb_tuned.fit(X_train, y_train)
-
-    y_proba = xgb_tuned.predict_proba(X_val)[:, 1]
-    roc_auc_score(y_val, y_proba)
 
     return xgb_tuned
 
@@ -196,81 +208,100 @@ def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
 
 def hyperparameter_tuning_lightgbm(X_train, y_train, X_val, y_val):
     """Hyperparameter tuning for LightGBM using Optuna."""
+    
+    n_neg = (y_train == 0).sum()
+    n_pos = (y_train == 1).sum()
+    scale_pos_weight = (n_neg / n_pos) * 2  # Multiply by 2-3 for better balance
 
     def objective_lgbm(trial):
         params = {
             "num_leaves": trial.suggest_int("num_leaves", 20, 150),
-            "max_depth": trial.suggest_int("max_depth", -1, 12),
+            "max_depth": trial.suggest_int("max_depth", -1, 10),
             "learning_rate": trial.suggest_float("learning_rate", 0.005, 0.2, log=True),
-            "n_estimators": trial.suggest_int("n_estimators", 200, 800),
+            "n_estimators": trial.suggest_int("n_estimators", 300, 900),
             "subsample": trial.suggest_float("subsample", 0.6, 1.0),
             "colsample_bytree": trial.suggest_float("colsample_bytree", 0.6, 1.0),
-            "min_child_samples": trial.suggest_int("min_child_samples", 10, 100),
+            "min_child_samples": trial.suggest_int("min_child_samples", 20, 150),
             "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 5.0),
             "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 5.0),
-            "random_state": 42,
+            "scale_pos_weight": scale_pos_weight,
             "objective": "binary",
-            "metric": "auc"
+            "metric": "auc",
+            "random_state": 42
         }
 
         model = LGBMClassifier(**params)
-
         model.fit(
             X_train, y_train,
             eval_set=[(X_val, y_val)],
             eval_metric="auc",
+            callbacks=[lgb.early_stopping(50, verbose=False)]
         )
 
         preds = model.predict_proba(X_val)[:, 1]
         return roc_auc_score(y_val, preds)
 
-
-    # Run Optuna study
     study_lgbm = optuna.create_study(direction="maximize")
     study_lgbm.optimize(objective_lgbm, n_trials=40)
 
-
-    # Get best parameters
     best_params_lgbm = study_lgbm.best_params
 
-
-    # Train final model with best parameters
-    lgbm_tuned = LGBMClassifier(
-        **best_params_lgbm,
-        objective="binary",
-        metric="auc",
-        random_state=42
+    lgbm_tuned = LGBMClassifier(**best_params_lgbm)
+    lgbm_tuned.fit(
+        X_train, y_train,
+        eval_set=[(X_val, y_val)],
+        eval_metric="auc",
+        callbacks=[lgb.early_stopping(50, verbose=False)]
     )
-
-    lgbm_tuned.fit(X_train, y_train)
-
-    return lgbm_tuned, y_val, X_val
+    
+    return lgbm_tuned
 
 
-def compare_tuned_and_baseline_models(X_val, y_val, log_reg_pipe,xgb_model,lgbm_model, xgb_tuned, lgbm_tuned):
-    """Compare baseline and tuned models."""
-
-        # Unpack if tuples
-    if isinstance(xgb_tuned, tuple):
-        xgb_tuned = xgb_tuned[0]
-    if isinstance(lgbm_tuned, tuple):
-        lgbm_tuned = lgbm_tuned[0]
 
 
-    results = {
-        'Model': ['LogisticRegression', 'XGBoost', 'LightGBM'],
-        'Baseline AUC': [
-            roc_auc_score(y_val, log_reg_pipe.predict_proba(X_val)[:, 1]),
-            roc_auc_score(y_val, xgb_model.predict_proba(X_val)[:, 1]),
-            roc_auc_score(y_val, lgbm_model.predict_proba(X_val)[:, 1])
-        ],
-        'Tuned AUC': [
-            None,
-            roc_auc_score(y_val, xgb_tuned.predict_proba(X_val)[:, 1]),
-            roc_auc_score(y_val, lgbm_tuned.predict_proba(X_val)[:, 1])
-        ]
+def compare_tuned_and_baseline_models(X_val, y_val, log_reg_pipe, xgb_model, lgbm_model, xgb_tuned, lgbm_tuned):
+    """Compare baseline and tuned models side by side."""
+    
+    def ks_statistic(y_true, y_proba):
+        """Kolmogorov–Smirnov statistic"""
+        from sklearn.metrics import roc_curve
+        fpr, tpr, _ = roc_curve(y_true, y_proba)
+        return max(tpr - fpr)
+    
+    models = {
+        "Logistic Regression": log_reg_pipe,
+        "XGBoost Baseline": xgb_model,
+        "XGBoost Tuned": xgb_tuned,
+        "LightGBM Baseline": lgbm_model,
+        "LightGBM Tuned": lgbm_tuned
     }
-
+    
+    results = []
+    
+    for model_name, model in models.items():
+        y_proba = model.predict_proba(X_val)[:, 1]
+        y_pred = (y_proba >= 0.15).astype(int)
+        
+        # Metrics
+        roc_auc = roc_auc_score(y_val, y_proba)
+        precision_arr, recall_arr, _ = precision_recall_curve(y_val, y_proba)
+        pr_auc = auc(recall_arr, precision_arr)
+        prec = precision_score(y_val, y_pred)
+        rec = recall_score(y_val, y_pred)
+        f1 = f1_score(y_val, y_pred)
+        ks = ks_statistic(y_val, y_proba)
+        gini = 2 * roc_auc - 1
+        
+        results.append({
+            "Model": model_name,
+            "AUC-ROC": roc_auc,
+            "AUC-PR": pr_auc,
+            "Precision": prec,
+            "Recall": rec,
+            "F1-score": f1,
+            "KS": ks,
+            "Gini": gini
+        })
+    
     df = pd.DataFrame(results)
-
     return df
