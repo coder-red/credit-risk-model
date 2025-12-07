@@ -115,8 +115,7 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 ## Repository structure
 
 
-<details>
-  <summary><strong>Repository Structure (click to expand)</strong></summary>
+  <summary><strong>Repository Structure (click to expand)</strong>
 
 credit-risk-model/
 ├── assets/                          # Images used in the README (plots, diagrams, cover images)
@@ -211,5 +210,5 @@ credit-risk-model/
 ├── README.md                        # Project overview
 └── requirements.txt                 # Required python packages
 
-</details>
 
+</summary>

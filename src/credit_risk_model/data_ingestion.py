@@ -32,6 +32,3 @@ def load_csvs_to_duckdb(con):
 def get_connection():
     """Get or create DuckDB connection."""
     return duckdb.connect(str(DB_PATH))
-
-
-
