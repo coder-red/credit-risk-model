@@ -113,19 +113,21 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 - Monitor model performance over time and retrain quarterly
 
 ## Repository structure
+
+
 <details>
   <summary><strong>Repository Structure (click to expand)</strong></summary>
 
 credit-risk-model/
-├── assets/                          <!-- Images used in the README (plots, diagrams, cover images) -->
+├── assets/                          # Images used in the README (plots, diagrams, cover images)
 │   ├── confusion_matrix_lgbm_tuned.png
 │   ├── Credit_img.png
 │   ├── roc_curve.png
 │   ├── shap_summary_bar.png
 │   └── target_dist.png
 │
-├── data/                            <!-- All data (raw, processed, samples) -->
-│   ├── data_sample/                 <!-- small samples for quick loading -->
+├── data/                            # All data (raw, processed, samples)
+│   ├── data_sample/                 # small samples for quick loading 
 │   │   ├── application_test_sample.csv
 │   │   ├── application_train_sample.csv
 │   │   ├── bureau_balance_sample.csv
@@ -135,7 +137,7 @@ credit-risk-model/
 │   │   ├── POS_CASH_balance_sample.csv
 │   │   └── previous_application_sample.csv
 │   │
-│   ├── processed/                   <!-- cleaned + feature engineered datasets (not tracked in git) -->
+│   ├── processed/                   # cleaned + feature engineered datasets (not tracked in git)
 │   │   ├── agg_main.csv
 │   │   ├── cleaned_train.csv
 │   │   ├── cleaned_val.csv
@@ -144,7 +146,7 @@ credit-risk-model/
 │   │   ├── target_train.csv
 │   │   └── target_val.csv
 │   │
-│   └── raw/                         <!-- original home credit datasets (not tracked in git) -->
+│   └── raw/                         # original home credit datasets (not tracked in git)
 │       ├── application_test.csv
 │       ├── application_train.csv
 │       ├── bureau_balance.csv
@@ -153,20 +155,20 @@ credit-risk-model/
 │       ├── installments_payments.csv
 │       ├── POS_CASH_balance.csv
 │       ├── previous_application.csv
-│       └── README.md                <!-- Download instructions -->
+│       └── README.md                # Download instructions
 │
-├── models/                          <!-- Saved trained models (not tracked in git) -->
+├── models/                          # Saved trained models (not tracked in git)
 │   ├── LightGBM.joblib
 │   ├── log_reg.joblib
 │   └── XGBoost.joblib
 │
-├── notebooks/                       <!-- Jupyter notebooks for analysis + modelling + interpretation -->
+├── notebooks/                       # Jupyter notebooks for analysis + modelling + interpretation
 │   ├── 01_eda.ipynb
 │   ├── 02_modelling.ipynb
 │   └── 03_explainability.ipynb
 │
-├── results/                         <!-- Generated plots and outputs -->
-│   ├── EDA/                         <!-- EDA visualisations -->
+├── results/                         # Generated plots and outputs
+│   ├── EDA/                         # EDA visualisations
 │   │   ├── CODE_GENDER_target_relationship.png
 │   │   ├── CODE_GENDER_value_counts.png
 │   │   ├── correlation_matrix.png
@@ -179,7 +181,7 @@ credit-risk-model/
 │   │   ├── OCCUPATION_TYPE_value_counts.png
 │   │   └── target_dist.png
 │   │
-│   └── explainability/              <!-- Model interpretation outputs -->
+│   └── explainability/              # Model interpretation outputs
 │       ├── lime_0.png
 │       ├── lime_1.png
 │       ├── lime_2.png
@@ -192,20 +194,22 @@ credit-risk-model/
 │       ├── shap_summary_bar.png
 │       └── shap_summary.png
 │
-├── src/                             <!-- Source code (Python modules) -->
-│   ├── credit_risk_model/           <!-- Package folder for imports -->
+├── src/                             # Source code (Python modules)
+│   ├── credit_risk_model/           # Package folder for imports
 │   │   ├── __init__.py
-│   │   ├── aggregations.py          <!-- Aggregations -->
-│   │   ├── config.py                <!-- Paths and constants -->
-│   │   ├── data_cleaning.py         <!-- Cleaning + preprocessing logic -->
-│   │   ├── data_ingestion.py        <!-- DuckDB ingestion + joins -->
-│   │   ├── feat_eng.py              <!-- Feature engineering functions -->
-│   │   └── model.py                 <!-- Training + evaluation -->
+│   │   ├── aggregations.py          # Aggregations
+│   │   ├── config.py                # Paths and constants
+│   │   ├── data_cleaning.py         # Cleaning + preprocessing logic
+│   │   ├── data_ingestion.py        # DuckDB ingestion + joins
+│   │   ├── feat_eng.py              # Feature engineering functions
+│   │   └── model.py                 # Training + evaluation
+│   │
 │
-├── .gitignore                       <!-- Files/folders ignored by git -->
-├── home_credit.duckdb               <!-- DuckDB database file -->
-├── pyproject.toml                   <!-- Build system config -->
-├── README.md                        <!-- Project overview -->
-└── requirements.txt                 <!-- Required python packages -->
+├── .gitignore                       # Files/folders ignored by git
+├── home_credit.duckdb               # DuckDB database file
+├── pyproject.toml                   # Build system config 
+├── README.md                        # Project overview
+└── requirements.txt                 # Required python packages
 
 </details>
+
