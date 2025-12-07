@@ -212,4 +212,3 @@ credit-risk-model/
 ├── README.md                        # Project overview
 └── requirements.txt                 # Required python packages
 
-</details>
