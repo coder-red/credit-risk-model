@@ -100,8 +100,8 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 
 **What I found:**
 - Based on the analysis in this project it was found that loan amount, existing debt ratio, and age were the strongest predictors of default
-- Tuning barely helped improve the model performance, for example XGBoost went from 0.722349 to 0.724171 AUC and it took over 30 minutes to tune
-- For imbalanced data, AUC matters way more than accuracy, and the 0.5 threshold doesn't work (except for logistic regression), the optimal threshold was 0.121
+- Hyperparameter tuning barely helped improve the model performance, for example XGBoost went from 0.722349 to 0.724171 AUC and it took over 30 minutes to train. This suggests that features matter more than tuning
+- For imbalanced data, AUC-ROC matters way more than accuracy, and the 0.5 threshold doesn't work (except for logistic regression), the optimal threshold was 0.121
 
 **Recommendations:**
 - Recommendation would be to focus more on the loan amount when deciding since they carry the most risk and also accept that precision will be low, you'll reject some good customers to catch defaults
