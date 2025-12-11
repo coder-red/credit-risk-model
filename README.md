@@ -120,7 +120,7 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 ```text
 
 credit-risk-model/
-├── assets/                          # Images used in the README (plots, diagrams, cover images)
+├── assets/                          # Images used in the README 
 │   ├── confusion_matrix_lgbm_tuned.png
 │   ├── Credit_img.png
 │   ├── roc_curve.png
@@ -195,7 +195,7 @@ credit-risk-model/
 │       ├── shap_summary_bar.png
 │       └── shap_summary.png
 │
-├── src/                             # Source code (Python modules)
+├── src/                             # Python modules
 │   ├── credit_risk_model/           # Package folder for imports
 │   │   ├── __init__.py
 │   │   ├── aggregations.py          # Aggregations
