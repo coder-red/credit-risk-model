@@ -18,7 +18,7 @@
 
   - [Author](#author)
   - [Table of Contents](#table-of-contents)
-  - [Business problem](#business-problem)
+  - [Business Context](#business-context)
   - [Data source](#data-source)
   - [Methods](#methods)
   - [Tech Stack](#tech-stack)
@@ -28,7 +28,7 @@
   - [Repository structure](#repository-structure)
 
 
-## Business problem
+## Business Context
 
 This model predicts if a borrower will pay back a loan or not. Lending institutions use this to make informed decisions on whether to approve a loan or not, interest rate to charge and risk management. 
 
