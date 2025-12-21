@@ -1,4 +1,7 @@
-![Banner](assets/Credit_img.png)
+<p align="center">
+  <img src="assets/Credit_img.png" alt="Project Banner" width="100%">
+</p>
+
 
 ![Python version](https://img.shields.io/badge/Python%20version-3.10%2B-lightgrey)
 ![GitHub repo size](https://img.shields.io/github/repo-size/coder-red/credit-risk-model)
@@ -18,7 +21,7 @@
 
   - [Author](#author)
   - [Table of Contents](#table-of-contents)
-  - [Business problem](#business-problem)
+  - [Business Context](#business-Context)
   - [Data source](#data-source)
   - [Methods](#methods)
   - [Tech Stack](#tech-stack)
@@ -28,7 +31,7 @@
   - [Repository structure](#repository-structure)
 
 
-## Business problem
+## Business Context
 
 This model predicts if a borrower will pay back a loan or not. Lending institutions use this to make informed decisions on whether to approve a loan or not, interest rate to charge and risk management. 
 
@@ -72,7 +75,7 @@ ROC curve of LightGBM.
 
 ![ROC curve](assets/roc_curve.png)
 
-Top 3 models (with default parameters)
+Top 3 models 
 
 | Model     	         |    AUC-ROC score     |
 |----------------------|----------------------|
