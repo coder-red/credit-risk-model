@@ -21,7 +21,7 @@
 
   - [Author](#author)
   - [Table of Contents](#table-of-contents)
-  - [Business problem](#business-problem)
+  - [Business Context](#business-context)
   - [Data source](#data-source)
   - [Methods](#methods)
   - [Tech Stack](#tech-stack)
