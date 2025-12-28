@@ -8,3 +8,10 @@ Requires-Dist: scikit-learn
 Requires-Dist: duckdb
 Requires-Dist: matplotlib
 Requires-Dist: seaborn
+Requires-Dist: xgboost
+Requires-Dist: lightgbm
+Requires-Dist: optuna
+Requires-Dist: shap
+Requires-Dist: joblib
+Requires-Dist: streamlit
+Requires-Dist: statsmodels

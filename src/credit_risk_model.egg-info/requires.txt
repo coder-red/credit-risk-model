@@ -4,3 +4,10 @@ scikit-learn
 duckdb
 matplotlib
 seaborn
+xgboost
+lightgbm
+optuna
+shap
+joblib
+streamlit
+statsmodels

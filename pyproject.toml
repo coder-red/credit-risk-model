@@ -19,8 +19,7 @@ dependencies = [
     "shap",
     "joblib",
     "streamlit",  
-    "pillow",
-    "tqdm",
+    "statsmodels"
 ]
 
 [tool.setuptools]
