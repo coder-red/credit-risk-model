@@ -1,5 +1,7 @@
 data/raw/*
 data/processed/*
+!data/processed/
+!data/processed/feature_list.joblib
 *.duckdb
 __pycache__/
 .ipynb_checkpoints/
