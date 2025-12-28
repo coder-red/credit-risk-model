@@ -7,6 +7,8 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/coder-red/credit-risk-model)
 ![GitHub last commit](https://img.shields.io/github/last-commit/coder-red/credit-risk-model)
 ![Type of ML](https://img.shields.io/badge/Type%20of%20ML-Binary%20Classification-red)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://credit-risk-model-demo.streamlit.app/)
+
 
 
 # Key findings: Borrowers asking for a higher loan amount and those having existing debt burdens were significantly more likely to default. 
@@ -24,6 +26,7 @@
   - [Business Context](#business-context)
   - [Data source](#data-source)
   - [Methods](#methods)
+  - [Live Demo](#live-demo)
   - [Tech Stack](#tech-stack)
   - [Quick glance at the results](#quick-glance-at-the-results)
   - [Lessons learned and recommendation](#lessons-learned-and-recommendation)
@@ -48,6 +51,18 @@ This model predicts if a borrower will pay back a loan or not. Lending instituti
 - Optuna Hyperparameter tuning 
 - SHAP and LIME Model explainability
 
+## Live Demo
+
+🚀 **[Try the Interactive App](https://credit-risk-model-demo.streamlit.app/)**
+
+The trained LightGBM model is deployed as an interactive web application where you can:
+- Generate random credit risk predictions
+- Upload CSV files for batch predictions
+- View model performance metrics
+
+<!-- ![App Demo](assets/streamlit_demo.gif) -->
+
+
 ## Tech Stack
 
 - Python (refer to requirement.txt for the packages used in this project)
@@ -55,7 +70,7 @@ This model predicts if a borrower will pay back a loan or not. Lending instituti
 - Scikit-learn, XGBoost, LightGBM (machine learning )
 - SHAP & LIME (model explainability)
 - Optuna (Hyperparameter tuning) 
-
+- Streamlit (interactive web application & deployment)
 
 ## Quick glance at the results
 
@@ -88,7 +103,7 @@ Top 3 models
 - ***Metrics used: Recall, AUC-ROC, AUC-PR, Precision,	F1-score, KS, Gini***
 
 
-### Model Evaluation Strategy
+## Model Evaluation Strategy
 
 **Primary Metric: ROC-AUC**
 Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how well the model does in separating defaulters from non defaulters
@@ -99,7 +114,7 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 - **F1** balances both precision and recall.
 
 
-## Lessons Learned and Recommendations
+## Lessons Learned and Recommendation 
 
 **What I found:**
 - Based on the analysis in this project it was found that loan amount, existing debt ratio, and age were the strongest predictors of default
@@ -109,7 +124,7 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 **Recommendations:**
 - Recommendation would be to focus more on the loan amount when deciding since they carry the most risk and also accept that precision will be low, you'll reject some good customers to catch defaults
 
-## Limitations and What Can Be Improved
+## Limitation and What Can Be Improved
 - Low precision means 80% of rejected applicants are false positives (lost customers)
 - Hyperparameter tuning with Optuna takes 1+ hours
 - Get more data 
