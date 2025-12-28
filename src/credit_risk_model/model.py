@@ -24,80 +24,6 @@ from sklearn.metrics import (
 import optuna
 
 
-def calculate_iv(df, feature, target):
-    """
-    Calculates Information Value (IV) for each features
-    Returns IV as a float.
-    """
-    # Fill NaNs with string for categorical treatment
-    df[feature] = df[feature].fillna("NULL")
-    
-    # Group by feature values
-    grouped = df.groupby(feature)[target].agg(['count', 'sum'])
-    grouped.rename(columns={'count': 'All', 'sum': 'Bad'}, inplace=True)
-    grouped['Good'] = grouped['All'] - grouped['Bad']
-    
-    # Avoid division by zero
-    grouped['Distr_Good'] = (grouped['Good'] / grouped['Good'].sum()).replace(0, 0.0001)
-    grouped['Distr_Bad'] = (grouped['Bad'] / grouped['Bad'].sum()).replace(0, 0.0001)
-    
-    # Calculate WoE and IV
-    """
-    WoE (Weight of Evidence) is a way to transform categorical features into a number that measures 
-        how predictive a category is.
-
-        the formula for WoE is:
-        WoE = ln(Distr_Bad / Distr_Good)
-    """
-    grouped['WoE'] = np.log(grouped['Distr_Bad'] / grouped['Distr_Good'])
-    grouped['IV'] = (grouped['Distr_Bad'] - grouped['Distr_Good']) * grouped['WoE']
-    
-    return grouped['IV'].sum()
-
-def select_features_by_iv(X, y, threshold=0.02, bins=10, verbose=True):
-    """
-    Selects features based on IV threshold.
-    
-    Parameters:
-    - X: pd.DataFrame, features
-    - y: pd.Series, binary target
-    - threshold: float, minimum IV to keep feature
-    - bins: int, number of bins for numeric features
-
-    Binning is splitting a continuous numeric variable into intervals. 
-    Each interval is called a bin
-    """
-    iv_values = {}
-    temp_df = X.copy()
-    temp_df['target'] = y
-    
-    # Bin numeric columns first
-    numeric_cols = X.select_dtypes(include=np.number).columns
-    for col in numeric_cols:
-        if X[col].nunique() > bins:
-            temp_df[col] = pd.qcut(temp_df[col], q=bins, duplicates='drop').astype(str)
-    
-    if verbose:
-        print(f"Calculating IV for {X.shape[1]} features...")
-    
-    # Compute IV for all features
-    for col in X.columns:
-        try:
-            iv = calculate_iv(temp_df, col, 'target')
-            iv_values[col] = iv
-        except Exception as e:
-            if verbose:
-                print(f"Skipping column {col} due to error: {e}")
-    
-    # Filter features above threshold
-    selected_feats = [col for col, iv in iv_values.items() if iv >= threshold]
-    
-    if verbose:
-        print(f"Selected {len(selected_feats)} features out of {X.shape[1]} (threshold={threshold})")
-    
-    return selected_feats
-
-
 def train_logistic_regression(X_train, y_train, X_val, y_val):
     """Train a Logistic Regression model."""
      # Detect binary columns
@@ -222,8 +148,7 @@ def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
 
     n_neg = (y_train == 0).sum()
     n_pos = (y_train == 1).sum()
-    scale_pos_weight = (n_neg / n_pos) * 2
-
+    scale_pos_weight = n_neg / n_pos
     def objective(trial):
         params = {
             "n_estimators": trial.suggest_int("n_estimators", 300, 900),
@@ -261,7 +186,7 @@ def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
 
     best_params = study.best_params
 
-    # ❗ FIX: put early stopping back for final training
+    #  FIX: put early stopping back for final training
     best_params["early_stopping_rounds"] = 50
     best_params["eval_metric"] = "auc"
     best_params["tree_method"] = "hist"
@@ -285,7 +210,7 @@ def hyperparameter_tuning_lightgbm(X_train, y_train, X_val, y_val):
     
     n_neg = (y_train == 0).sum()
     n_pos = (y_train == 1).sum()
-    scale_pos_weight = (n_neg / n_pos) * 2  # Multiply by 2-3 for better balance
+    scale_pos_weight = n_neg / n_pos
 
     def objective_lgbm(trial):
         params = {
