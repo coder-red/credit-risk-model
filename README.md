@@ -60,7 +60,11 @@ The trained LightGBM model is deployed as an interactive web application where y
 - Upload CSV files for batch predictions
 - View model performance metrics
 
-![App Screenshot](assets/capture.PNG)
+[App Screenshot](assets/capture.PNG)
+<p align="center">
+  <img src="assets/capture.PNG" alt="Project Banner" width="100%">
+</p>
+
 
 
 ## Tech Stack
