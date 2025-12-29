@@ -62,7 +62,7 @@ The trained LightGBM model is deployed as an interactive web application where y
 
 [App Screenshot](assets/capture.PNG)
 <p align="center">
-  <img src="assets/capture.PNG" alt="Project Banner" width="100%">
+  <img src="assets/capture.png" alt="Project Banner" width="100%">
 </p>
 
 
