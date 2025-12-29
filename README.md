@@ -60,9 +60,10 @@ The trained LightGBM model is deployed as an interactive web application where y
 - Upload CSV files for batch predictions
 - View model performance metrics
 
-[App Screenshot](assets/Capture.PNG)
+![App Screenshot](assets/Capture.PNG)
+![roc](assets/roc_curve.PNG)
 <p align="center">
-  <img src="assets\Capture.png" alt="Project Banner" width="100%">
+  <img src="assets/Capture.PNG" alt="Project Banner" width="100%">
 </p>
 
 
