@@ -61,12 +61,6 @@ The trained LightGBM model is deployed as an interactive web application where y
 - View model performance metrics
 
 ![App Screenshot](assets/Capture.PNG)
-![roc](assets/roc_curve.PNG)
-<p align="center">
-  <img src="assets/Capture.PNG" alt="Project Banner" width="100%">
-</p>
-
-
 
 ## Tech Stack
 
