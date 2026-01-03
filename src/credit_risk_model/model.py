@@ -24,7 +24,7 @@ from sklearn.metrics import (
 import optuna
 
 
-def train_logistic_regression(X_train, y_train, X_val, y_val):
+def train_logistic_regression(X_train, y_train, X_val):
     """Train a Logistic Regression model."""
      # Detect binary columns
     binary_cols = [col for col in X_train.columns if X_train[col].nunique() <= 3] # including 0,1 and 3 for gender col
@@ -53,7 +53,7 @@ def train_logistic_regression(X_train, y_train, X_val, y_val):
 
 
 
-def train_xgboost(X_train, y_train, X_val, y_val):
+def train_xgboost(X_train, y_train, X_val):
     """Train an XGBoost model."""
     xgb_model = XGBClassifier(
         n_estimators=100,
@@ -73,7 +73,7 @@ def train_xgboost(X_train, y_train, X_val, y_val):
     return xgb_model, y_proba_xgb, y_pred_xgb
 
 
-def train_lightgbm(X_train, y_train, X_val, y_val):
+def train_lightgbm(X_train, y_train, X_val):
     """Train a LightGBM model."""
     lgbm_model = LGBMClassifier(
         n_estimators=100,
