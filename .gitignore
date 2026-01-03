@@ -8,3 +8,4 @@ __pycache__/
 .env
 venv/
 *.egg-info/
+src\credit_risk_model.egg-info
