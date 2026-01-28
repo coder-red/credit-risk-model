@@ -22,30 +22,31 @@ from sklearn.metrics import (
     confusion_matrix
 )
 import optuna
+from sklearn.impute import SimpleImputer
+
+
 
 
 def train_logistic_regression(X_train, y_train, X_val):
     """Train a Logistic Regression model."""
-     # Detect binary columns
-    binary_cols = [col for col in X_train.columns if X_train[col].nunique() <= 3] # including 0,1 and 3 for gender col
+    binary_cols = [col for col in X_train.columns if X_train[col].nunique() <= 3]
     continuous_cols = [col for col in X_train.columns if col not in binary_cols]
 
-
-    # use pipeline to scale as it is needed for logistic regression
+    # Updated pipeline to include Median Imputation for the new NaN ratios
     preprocessor = ColumnTransformer([
-        ('scale', StandardScaler(), continuous_cols),
+        ('scale', Pipeline([
+            ('impute', SimpleImputer(strategy='median')), # Fills NaNs with median
+            ('scaler', StandardScaler())
+        ]), continuous_cols),
         ('pass', 'passthrough', binary_cols)
     ])
+    
     log_reg_pipe = Pipeline([
         ('preprocessor', preprocessor),
-        ('logistic_reg', LogisticRegression(max_iter=1000, random_state=42, class_weight='balanced'))
+        ('logistic_reg', LogisticRegression(max_iter=1000, random_state=42, class_weight='balanced')) 
     ])
 
-
-    # train
     log_reg_pipe.fit(X_train, y_train)
-
-    # predict # remove these????  
     y_pred = log_reg_pipe.predict(X_val)
     y_proba = log_reg_pipe.predict_proba(X_val)[:, 1]
 
@@ -55,12 +56,16 @@ def train_logistic_regression(X_train, y_train, X_val):
 
 def train_xgboost(X_train, y_train, X_val):
     """Train an XGBoost model."""
+    weight = (y_train == 0).sum() / (y_train == 1).sum()
+
     xgb_model = XGBClassifier(
         n_estimators=100,
         max_depth=6,
         learning_rate=0.1,
         random_state=42,
-        eval_metric='aucpr'  # Better for imbalanced data
+        scale_pos_weight=weight,
+        eval_metric='aucpr',  # Better for imbalanced data
+        verbose=-1
     )
 
     # Fit model
@@ -70,16 +75,19 @@ def train_xgboost(X_train, y_train, X_val):
     y_proba_xgb = xgb_model.predict_proba(X_val)[:, 1]
     y_pred_xgb = (y_proba_xgb >= 0.15).astype(int)
 
-    return xgb_model, y_proba_xgb, y_pred_xgb
+    return xgb_model, y_proba_xgb, y_pred_xgb  
 
 
 def train_lightgbm(X_train, y_train, X_val):
     """Train a LightGBM model."""
+    weight = (y_train == 0).sum() / (y_train == 1).sum()
     lgbm_model = LGBMClassifier(
         n_estimators=100,
         max_depth=6,
         learning_rate=0.1,
         random_state=42,
+        scale_pos_weight=weight,
+        eval_metric='aucpr', 
         verbose=-1
     )
 
@@ -144,7 +152,8 @@ def compare_models(X_val, y_val, log_reg_pipe, xgb_model, lgbm_model):
     return results_df
 
 def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
-    """Hyperparameter tuning for XGBoost using Optuna (correct for XGBoost 3.x)."""
+    """Hyperparameter tuning for XGBoost using Optuna (correct for XGBoost 3.x).
+    scale_pos_weight is calculated to address class imbalance."""
 
     n_neg = (y_train == 0).sum()
     n_pos = (y_train == 1).sum()
@@ -186,9 +195,11 @@ def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
 
     best_params = study.best_params
 
+    best_params["scale_pos_weight"] = scale_pos_weight 
+
     #  FIX: put early stopping back for final training
     best_params["early_stopping_rounds"] = 50
-    best_params["eval_metric"] = "auc"
+    best_params["eval_metric"] = "aucpr"
     best_params["tree_method"] = "hist"
     best_params["random_state"] = 42
 
@@ -206,7 +217,8 @@ def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
 
 
 def hyperparameter_tuning_lightgbm(X_train, y_train, X_val, y_val):
-    """Hyperparameter tuning for LightGBM using Optuna."""
+    """Hyperparameter tuning for LightGBM using Optuna.
+    scale_pos_weight is calculated to address class imbalance."""
     
     n_neg = (y_train == 0).sum()
     n_pos = (y_train == 1).sum()
@@ -244,6 +256,7 @@ def hyperparameter_tuning_lightgbm(X_train, y_train, X_val, y_val):
     study_lgbm.optimize(objective_lgbm, n_trials=40)
 
     best_params_lgbm = study_lgbm.best_params
+    best_params_lgbm["scale_pos_weight"] = scale_pos_weight  
 
     lgbm_tuned = LGBMClassifier(**best_params_lgbm)
     lgbm_tuned.fit(
