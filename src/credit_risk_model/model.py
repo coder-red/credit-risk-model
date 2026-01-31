@@ -56,20 +56,18 @@ def train_logistic_regression(X_train, y_train, X_val):
 
 def train_xgboost(X_train, y_train, X_val):
     """Train an XGBoost model."""
-    weight = (y_train == 0).sum() / (y_train == 1).sum()
 
     xgb_model = XGBClassifier(
         n_estimators=100,
         max_depth=6,
         learning_rate=0.1,
         random_state=42,
-        scale_pos_weight=weight,
         eval_metric='aucpr',  # Better for imbalanced data
-        verbose=-1
-    )
+        importance_type='gain'
+         )
 
     # Fit model
-    xgb_model.fit(X_train, y_train)
+    xgb_model.fit(X_train, y_train, verbose=False)
 
     # Predict
     y_proba_xgb = xgb_model.predict_proba(X_val)[:, 1]
@@ -80,16 +78,15 @@ def train_xgboost(X_train, y_train, X_val):
 
 def train_lightgbm(X_train, y_train, X_val):
     """Train a LightGBM model."""
-    weight = (y_train == 0).sum() / (y_train == 1).sum()
     lgbm_model = LGBMClassifier(
         n_estimators=100,
         max_depth=6,
         learning_rate=0.1,
         random_state=42,
-        scale_pos_weight=weight,
-        eval_metric='aucpr', 
+        importance_type='gain',
+        metric='aucpr', 
         verbose=-1
-    )
+        )
 
     lgbm_model.fit(X_train, y_train)
 
@@ -197,7 +194,7 @@ def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
 
     best_params["scale_pos_weight"] = scale_pos_weight 
 
-    #  FIX: put early stopping back for final training
+    # early stopping back for final training
     best_params["early_stopping_rounds"] = 50
     best_params["eval_metric"] = "aucpr"
     best_params["tree_method"] = "hist"
@@ -217,17 +214,11 @@ def hyperparameter_tuning_xgboost(X_train, y_train, X_val, y_val):
 
 
 def hyperparameter_tuning_lightgbm(X_train, y_train, X_val, y_val):
-    """Hyperparameter tuning for LightGBM using Optuna.
-    scale_pos_weight is calculated to address class imbalance."""
-    
-    n_neg = (y_train == 0).sum()
-    n_pos = (y_train == 1).sum()
-    scale_pos_weight = n_neg / n_pos
 
     def objective_lgbm(trial):
         params = {
             "num_leaves": trial.suggest_int("num_leaves", 20, 150),
-            "max_depth": trial.suggest_int("max_depth", -1, 10),
+            "max_depth": trial.suggest_int("max_depth", 3, 7),  # slightly safer
             "learning_rate": trial.suggest_float("learning_rate", 0.005, 0.2, log=True),
             "n_estimators": trial.suggest_int("n_estimators", 300, 900),
             "subsample": trial.suggest_float("subsample", 0.6, 1.0),
@@ -235,7 +226,7 @@ def hyperparameter_tuning_lightgbm(X_train, y_train, X_val, y_val):
             "min_child_samples": trial.suggest_int("min_child_samples", 20, 150),
             "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 5.0),
             "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 5.0),
-            "scale_pos_weight": scale_pos_weight,
+            "is_unbalance": True,   
             "objective": "binary",
             "metric": "auc",
             "random_state": 42
@@ -252,31 +243,28 @@ def hyperparameter_tuning_lightgbm(X_train, y_train, X_val, y_val):
         preds = model.predict_proba(X_val)[:, 1]
         return roc_auc_score(y_val, preds)
 
-    study_lgbm = optuna.create_study(direction="maximize")
-    study_lgbm.optimize(objective_lgbm, n_trials=40)
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective_lgbm, n_trials=40)
 
-    best_params_lgbm = study_lgbm.best_params
-    best_params_lgbm["scale_pos_weight"] = scale_pos_weight  
-
-    lgbm_tuned = LGBMClassifier(**best_params_lgbm)
+    lgbm_tuned = LGBMClassifier(**study.best_params)
     lgbm_tuned.fit(
         X_train, y_train,
         eval_set=[(X_val, y_val)],
         eval_metric="auc",
         callbacks=[lgb.early_stopping(50, verbose=False)]
     )
-    
+
     return lgbm_tuned
 
 
 
 
 def compare_tuned_and_baseline_models(X_val, y_val, xgb_model, lgbm_model, xgb_tuned, lgbm_tuned):
-    """Compare baseline and tuned models side by side."""
-    
+    from sklearn.metrics import roc_curve, precision_recall_curve, f1_score, precision_score, recall_score, roc_auc_score
+    import numpy as np
+    import pandas as pd
+
     def ks_statistic(y_true, y_proba):
-        """Kolmogorov–Smirnov statistic"""
-        from sklearn.metrics import roc_curve
         fpr, tpr, _ = roc_curve(y_true, y_proba)
         return max(tpr - fpr)
     
@@ -291,13 +279,19 @@ def compare_tuned_and_baseline_models(X_val, y_val, xgb_model, lgbm_model, xgb_t
     
     for model_name, model in models.items():
         y_proba = model.predict_proba(X_val)[:, 1]
-        y_pred = (y_proba >= 0.15).astype(int)
-        
+
+        # 🔹 Pick optimal threshold: maximize F1
+        precision_arr, recall_arr, thresholds = precision_recall_curve(y_val, y_proba)
+        f1_scores = 2 * (precision_arr[:-1] * recall_arr[:-1]) / (precision_arr[:-1] + recall_arr[:-1] + 1e-9)
+        best_idx = np.argmax(f1_scores)
+        optimal_threshold = thresholds[best_idx]
+
+        y_pred = (y_proba >= optimal_threshold).astype(int)
+
         # Metrics
         roc_auc = roc_auc_score(y_val, y_proba)
-        precision_arr, recall_arr, _ = precision_recall_curve(y_val, y_proba)
         pr_auc = auc(recall_arr, precision_arr)
-        prec = precision_score(y_val, y_pred)
+        prec = precision_score(y_val, y_pred, zero_division=0)
         rec = recall_score(y_val, y_pred)
         f1 = f1_score(y_val, y_pred)
         ks = ks_statistic(y_val, y_proba)
@@ -305,6 +299,7 @@ def compare_tuned_and_baseline_models(X_val, y_val, xgb_model, lgbm_model, xgb_t
         
         results.append({
             "Model": model_name,
+            "Optimal Threshold": optimal_threshold,
             "AUC-ROC": roc_auc,
             "AUC-PR": pr_auc,
             "Precision": prec,
@@ -314,5 +309,4 @@ def compare_tuned_and_baseline_models(X_val, y_val, xgb_model, lgbm_model, xgb_t
             "Gini": gini
         })
     
-    df = pd.DataFrame(results)
-    return df
+    return pd.DataFrame(results)

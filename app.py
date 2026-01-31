@@ -5,7 +5,12 @@ import numpy as np
 from credit_risk_model.config import MODELS_DIR, DATA_PROCESSED
 import os
 
-
+# Import RAG (only if available)
+try:
+    from retrieval import query_eba_guide
+    RAG_AVAILABLE = True
+except ImportError:
+    RAG_AVAILABLE = False
 
 # ==================== PAGE CONFIG ====================
 st.set_page_config(
@@ -18,43 +23,56 @@ st.set_page_config(
 @st.cache_resource
 def load_model_and_features():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
     model = joblib.load(os.path.join(BASE_DIR, "models", "LightGBM.joblib"))
     feature_list = joblib.load(os.path.join(BASE_DIR, "data", "processed", "feature_list.joblib"))
     return model, feature_list
 
 model, feature_list = load_model_and_features()
 
+# Feature to EBA indicator mapping
+FEATURE_TO_EBA = {
+    'avg_utilization': 'Credit utilization (AQT - Asset Quality)',
+    'total_late_months': 'Payment history (AQT - Asset Quality)',
+    'debt_to_income': 'Debt-to-income ratio (PFT - Profitability)',
+    'n_active_loans': 'Active loans count (CON - Concentration)',
+    'credit_income_ratio': 'Credit-to-income ratio (AQT)',
+    'age_years': 'Borrower age (demographic risk factor)',
+    'total_income': 'Income level (creditworthiness indicator)',
+}
+
 # ==================== HEADER ====================
-st.title(" Credit Risk Prediction System")
+st.title("🤑 Credit Risk Prediction System")
 st.markdown("""
 This ML-powered system predicts credit default probability using **LightGBM** trained on 250k+ loan applications.
 Upload a CSV file or use the demo to see predictions.
 """)
 
 # ==================== TABS ====================
-tab1, tab2, tab3 = st.tabs(["📊 Demo Prediction", "📁 Batch Upload", "ℹ️ Model Info"])
+if RAG_AVAILABLE:
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Demo Prediction", "📁 Batch Upload", "ℹ️ Model Info", "🤖 EBA Guide"])
+else:
+    tab1, tab2, tab3 = st.tabs(["📊 Demo Prediction", "📁 Batch Upload", "ℹ️ Model Info"])
 
 # ==================== TAB 1: DEMO ====================
 with tab1:
     st.subheader("Quick Demo")
-    st.info(" Click the button below to run a prediction with sample data")
+    st.info("📌 Click the button below to run a prediction with sample data")
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        if st.button(" Generate Random Prediction", use_container_width=True, type="primary"):
+        if st.button("🎲 Generate Random Prediction", use_container_width=True, type="primary"):
             # Generate random realistic applicant data
             sample_data = {feat: 0.0 for feat in feature_list}
             
-            # Randomize key features with realistic distributions
+            # Randomize key features
             income = np.random.choice([60000, 80000, 120000, 180000, 250000])
             age = np.random.randint(25, 65)
             n_loans = np.random.randint(1, 8)
             n_active = np.random.randint(0, min(n_loans + 1, 5))
             credit_util = np.random.uniform(0.1, 0.8)
             debt_ratio = np.random.uniform(0.5, 5.0)
-            late_payments = np.random.choice([0, 0, 0, 1, 2, 5])  # Most have none
+            late_payments = np.random.choice([0, 0, 0, 1, 2, 5])
             
             sample_data.update({
                 'total_income': float(income),
@@ -90,7 +108,7 @@ with tab1:
             with col_c:
                 st.metric("Risk Score", f"{(1-prob)*100:.0f}/100")
             
-            # Show feature importance
+            # Show applicant profile
             with st.expander("🔍 View Generated Applicant Profile"):
                 display_features = {
                     'Annual Income': f'${income:,}',
@@ -103,6 +121,37 @@ with tab1:
                 }
                 for k, v in display_features.items():
                     st.text(f"• {k}: {v}")
+            
+            # RAG-powered explanation
+            if RAG_AVAILABLE and prob > 0.3:
+                st.markdown("---")
+                st.subheader("🤖 EBA Regulatory Context")
+                
+                with st.spinner("Analyzing risk factors using EBA guidelines..."):
+                    # Identify top risk factors
+                    risk_features = []
+                    if credit_util > 0.6:
+                        risk_features.append(f"high credit utilization ({credit_util:.1%})")
+                    if late_payments > 0:
+                        risk_features.append(f"{late_payments} late payments")
+                    if debt_ratio > 3.0:
+                        risk_features.append(f"high debt-to-income ratio ({debt_ratio:.1f})")
+                    
+                    if risk_features:
+                        risk_text = ", ".join(risk_features)
+                        query = f"According to EBA guidelines, what are the risks associated with {risk_text} in credit risk assessment?"
+                        
+                        try:
+                            result = query_eba_guide(query)
+                            
+                            st.info("**Why was this applicant flagged as risky?**")
+                            st.write(result["answer"])
+                            
+                            with st.expander("📚 EBA Sources"):
+                                for i, src in enumerate(result["sources"], 1):
+                                    st.caption(f"{i}. Page {src['page']}: {src['text']}...")
+                        except Exception as e:
+                            st.warning("EBA context unavailable (check API keys)")
     
     with col2:
         st.markdown("### 📈 Model Performance")
@@ -124,22 +173,16 @@ with tab2:
     if uploaded_file:
         try:
             df_upload = pd.read_csv(uploaded_file)
-            
             st.success(f"✅ Loaded {len(df_upload)} records")
             
-            # Show preview
             with st.expander("Preview Data"):
                 st.dataframe(df_upload.head(10))
             
             if st.button("⚡ Run Predictions", type="primary"):
                 with st.spinner("Processing..."):
-                    # Ensure correct columns
                     df_features = df_upload[feature_list]
-                    
-                    # Predict
                     probabilities = model.predict_proba(df_features)[:, 1]
                     
-                    # Add results
                     df_upload['Default_Probability'] = probabilities
                     df_upload['Risk_Category'] = pd.cut(
                         probabilities,
@@ -147,19 +190,16 @@ with tab2:
                         labels=['Low Risk', 'Medium Risk', 'High Risk']
                     )
                     
-                    # Show results
                     st.dataframe(df_upload)
                     
-                    # Summary
                     col1, col2, col3 = st.columns(3)
                     col1.metric("Total", len(df_upload))
                     col2.metric("High Risk", sum(probabilities >= 0.4))
                     col3.metric("Avg Risk", f"{probabilities.mean():.1%}")
                     
-                    # Download
                     csv = df_upload.to_csv(index=False)
                     st.download_button(
-                        " Download Results",
+                        "💾 Download Results",
                         csv,
                         "predictions.csv",
                         "text/csv"
@@ -213,7 +253,90 @@ with tab3:
         """)
     
     st.markdown("---")
+    
+    # EBA feature mapping
+    if RAG_AVAILABLE:
+        st.subheader("🏛️ EBA Indicator Mapping")
+        st.markdown("Our model features align with EBA risk indicators:")
+        
+        for feature, eba_indicator in list(FEATURE_TO_EBA.items())[:7]:
+            st.text(f"• {feature} → {eba_indicator}")
+    
     st.info("💡 **Note**: This is a demonstration project. Real credit decisions should involve additional factors and human oversight.")
+
+# ==================== TAB 4: EBA GUIDE CHATBOT ====================
+if RAG_AVAILABLE:
+    with tab4:
+        st.subheader("🤖 EBA Methodological Guide Assistant")
+        st.markdown("""
+        Ask questions about **EBA credit risk guidelines** and how they relate to this model.
+        """)
+        
+        # Chat interface
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+        
+        # Display chat history
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+                if "sources" in message:
+                    with st.expander("📚 Sources"):
+                        for i, src in enumerate(message["sources"], 1):
+                            st.caption(f"{i}. Page {src['page']}")
+        
+        # Example questions
+        st.markdown("**💡 Example questions:**")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("What are AQT indicators?"):
+                st.session_state.example_query = "What are the main asset quality (AQT) indicators in the EBA guide?"
+            if st.button("Explain NPE ratio"):
+                st.session_state.example_query = "How should non-performing exposure (NPE) ratio be calculated?"
+        
+        with col2:
+            if st.button("Credit utilization risk"):
+                st.session_state.example_query = "Why is high credit utilization a risk factor according to EBA guidelines?"
+            if st.button("Late payment impact"):
+                st.session_state.example_query = "What is the impact of late payments on credit risk per EBA standards?"
+        
+        # Chat input
+        if prompt := st.chat_input("Ask about EBA guidelines..."):
+            query_text = prompt
+        elif "example_query" in st.session_state:
+            query_text = st.session_state.example_query
+            del st.session_state.example_query
+        else:
+            query_text = None
+        
+        if query_text:
+            # Add user message
+            st.session_state.messages.append({"role": "user", "content": query_text})
+            with st.chat_message("user"):
+                st.markdown(query_text)
+            
+            # Generate response
+            with st.chat_message("assistant"):
+                with st.spinner("Searching EBA guide..."):
+                    try:
+                        result = query_eba_guide(query_text)
+                        
+                        st.markdown(result['answer'])
+                        
+                        with st.expander("📚 Sources"):
+                            for i, src in enumerate(result['sources'], 1):
+                                st.caption(f"{i}. Page {src['page']}")
+                        
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": result['answer'],
+                            "sources": result['sources']
+                        })
+                    
+                    except Exception as e:
+                        st.error(f"Error: {str(e)}")
+                        st.info("Make sure you've run ingestion.py and set API keys in .env")
 
 # ==================== SIDEBAR ====================
 with st.sidebar:
@@ -221,18 +344,18 @@ with st.sidebar:
     
     st.markdown("### 💻 Portfolio Project")
     st.markdown("""
-
-
     **Built by:** Ahmed Mohammed 
-
-
-    **GitHub:**  https://github.com/coder-red 
-
+    
+    **GitHub:** https://github.com/coder-red 
+    
     **LinkedIn:** https://www.linkedin.com/in/coder-red
-
-
     """)
     
     st.divider()
     
- 
+    if RAG_AVAILABLE:
+        st.success("✅ RAG System Active")
+        st.caption("Powered by EBA Guide + Groq + Pinecone")
+    else:
+        st.warning("⚠️ RAG Unavailable")
+        st.caption("Run ingestion.py to enable")

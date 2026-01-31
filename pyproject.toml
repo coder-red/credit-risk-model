@@ -19,7 +19,17 @@ dependencies = [
     "shap",
     "joblib",
     "streamlit",  
-    "statsmodels"
+    "statsmodels",
+    # RAG dependencies
+    "langchain",
+    "langchain-community",
+    "langchain-pinecone",
+    "langchain-huggingface",
+    "sentence-transformers",
+    "pinecone-client",
+    "pypdf",
+    "groq",
+    "python-dotenv"
 ]
 
 [tool.setuptools]
