@@ -1,3 +1,8 @@
+# Credit Risk Prediction with Explainable AI
+
+An end-to-end machine learning system that predicts loan default risk using the Home Credit dataset, combining LightGBM modeling, SHAP/LIME explainability, and regulatory-aligned reporting.
+
+
 <p align="center">
   <img src="assets/Credit_img.png" alt="Project Banner" width="100%">
 </p>
@@ -60,7 +65,7 @@ This model predicts whether a loan applicant will repay or default using data fr
 
 **[Try the Interactive App](https://huggingface.co/spaces/mhmdxch/credit-hf)**
 
-The trained LightGBM model is deployed as an interactive web application where you can:
+The trained LightGBM model is deployed as an interactive web application hosted on Hugging Face Spaces using Streamlit where you can:
 - Generate random credit risk predictions
 - Upload CSV files for batch predictions
 - View model performance metrics
@@ -139,7 +144,7 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 ## Limitation and What Can Be Improved
 - Low precision means 80% of rejected applicants are false positives (lost customers)
 - Hyperparameter tuning with Optuna takes 1+ hours
-- Get more data 
+- Incorporate additional external data sources 
 - Monitor model performance over time and retrain quarterly
 
 ## Repository structure
