@@ -8,7 +8,6 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/coder-red/credit-risk-model)
 ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
 ![Type of ML](https://img.shields.io/badge/Type%20of%20ML-Binary%20Classification-red)
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)
 [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/mhmdxch/credit-hf)
 ![SHAP](https://img.shields.io/badge/SHAP-000000?style=for-the-badge&logo=python&logoColor=white)
 ![Pinecone](https://img.shields.io/badge/Pinecone-272046?style=for-the-badge&logo=pinecone&logoColor=white)
