@@ -53,14 +53,15 @@ This model predicts if a borrower will pay back a loan or not. Lending instituti
 
 ## Live Demo
 
-**[Try the Interactive App](https://credit-risk-model-demo.streamlit.app/)**
+**[Try the Interactive App](https://huggingface.co/spaces/mhmdxch/credit-hf)**
 
 The trained LightGBM model is deployed as an interactive web application where you can:
 - Generate random credit risk predictions
 - Upload CSV files for batch predictions
 - View model performance metrics
 
-![App Screenshot](assets/Capture.PNG)
+![App Demo]([streamlit-app-2026-02-02-09-02-81.webm](https://github.com/user-attachments/assets/e8563261-08f9-4a9e-8a21-3be2d084a437)
+)
 
 ## Tech Stack
 
