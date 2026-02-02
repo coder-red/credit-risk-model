@@ -60,14 +60,16 @@ This model predicts whether a loan applicant will repay or default using data fr
 ## Live Demo
 
 **[Try the Interactive App](https://huggingface.co/spaces/mhmdxch/credit-hf)**
-**[Try the Interactive App](https://huggingface.co/spaces/mhmdxch/credit-hf)**
 
 The trained LightGBM model is deployed as an interactive web application where you can:
 - Generate random credit risk predictions
 - Upload CSV files for batch predictions
 - View model performance metrics
 
-![App Demo](assets/credit.gif)
+<picture>
+  <source srcset="assets/credit.gif" type="image/gif">
+  <img src="assets/Credit_img.png" alt="App Demo Dashboard showing Credit Risk metrics">
+</picture>
 
 ## Tech Stack
 
