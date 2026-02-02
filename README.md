@@ -20,16 +20,14 @@ An end-to-end machine learning system that predicts loan default risk using the 
 
 
 
-# Key findings: Borrowers asking for a higher loan amount and those having existing debt burdens were significantly more likely to default. 
+## Key findings: Borrowers asking for a higher loan amount and those having existing debt burdens were significantly more likely to default. 
 
 ## Author
 
 - [@coder-red](https://www.github.com/coder-red)
 
 ## Table of Contents
-
-  - [Borrowers asking for a higher loan amount and those having existing debt burdens were significantly more likely to default](#Borrowers-asking-for-a-higher-loan-amount-and-those-having-existing-debt-burdens-were-significantly-more-likely-to-default)
-
+  - [Key findings](#Key-findings)
   - [Author](#author)
   - [Table of Contents](#table-of-contents)
   - [Business Context](#business-context)
