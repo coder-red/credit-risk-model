@@ -1,6 +1,6 @@
 # Credit Risk Prediction with Explainable AI
 
-An end-to-end machine learning system that predicts loan default risk using the Home Credit dataset, combining LightGBM modeling, SHAP/LIME explainability, and regulatory-aligned reporting.
+An end-to-end machine learning system that predicts loan default risk using the Home Credit dataset, combining LightGBM modeling, SHAP/LIME explainability, and RAG for regulatory-aligned reporting.
 
 
 <p align="center">
@@ -20,14 +20,13 @@ An end-to-end machine learning system that predicts loan default risk using the 
 
 
 
-## Key findings: Borrowers asking for a higher loan amount and those having existing debt burdens were significantly more likely to default. 
+# Key findings: Borrowers asking for a higher loan amount and those having existing debt burdens were significantly more likely to default. 
 
 ## Author
 
 - [@coder-red](https://www.github.com/coder-red)
 
 ## Table of Contents
-  - [Key findings](#Key-findings)
   - [Author](#author)
   - [Table of Contents](#table-of-contents)
   - [Business Context](#business-context)
