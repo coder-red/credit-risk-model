@@ -6,8 +6,13 @@
 ![Python version](https://img.shields.io/badge/Python%20version-3.10%2B-lightgrey)
 ![GitHub repo size](https://img.shields.io/github/repo-size/coder-red/credit-risk-model)
 ![GitHub last commit](https://img.shields.io/github/last-commit/coder-red/credit-risk-model)
+![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
 ![Type of ML](https://img.shields.io/badge/Type%20of%20ML-Binary%20Classification-red)
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://credit-risk-model-demo.streamlit.app/)
+[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/mhmdxch/credit-hf)
+![SHAP](https://img.shields.io/badge/SHAP-000000?style=for-the-badge&logo=python&logoColor=white)
+![Pinecone](https://img.shields.io/badge/Pinecone-272046?style=for-the-badge&logo=pinecone&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=groq&logoColor=white)
 
 
 
@@ -36,7 +41,8 @@
 
 ## Business Context
 
-This model predicts if a borrower will pay back a loan or not. Lending institutions use this to make informed decisions on whether to approve a loan or not, manage credit risks, and reduce default related losses.
+This model predicts whether a loan applicant will repay or default using data from 250k+ applications. The predictions are made with LightGBM and explained with SHAP and LIME for transparency and outputs are structured in line with EBA compliance standards.
+
 
 ## Data source
 
@@ -45,22 +51,22 @@ This model predicts if a borrower will pay back a loan or not. Lending instituti
 
 ## Methods
 
-- Data cleaning,preprocessing and Feature engineering to create predictive variables
-- Exploratory data analysis
-- Model training and evaluation with Logistic Regression, XGBoost, and LightGBM
-- Optuna Hyperparameter tuning 
-- SHAP and LIME Model explainability
+- **Feature Engineering:** Cleaned and Merged data from 8 data sources, then engineered 58 predictive features.
+- **Automated Optimization:** Optuna was used for hyperparameter tuning and benchmarking Logistic Regression against XGBoost and LightGBM to find the best model
+- **Explainable AI (XAI):** Integrated SHAP and LIME to point out major financial drivers
+- **Regulatory RAG:** Built a RAG pipeline to reference model outputs with the EBA (European Banking Authority) standards.
+
 
 ## Live Demo
 
-**[Try the Interactive App](https://credit-risk-model-demo.streamlit.app/)**
+**[Try the Interactive App](https://huggingface.co/spaces/mhmdxch/credit-hf)**
 
 The trained LightGBM model is deployed as an interactive web application where you can:
 - Generate random credit risk predictions
 - Upload CSV files for batch predictions
 - View model performance metrics
 
-![App Screenshot](assets/Capture.PNG)
+![App Demo](assets/credit.gif)
 
 ## Tech Stack
 
@@ -69,7 +75,10 @@ The trained LightGBM model is deployed as an interactive web application where y
 - Scikit-learn, XGBoost, LightGBM (machine learning )
 - SHAP & LIME (model explainability)
 - Optuna (Hyperparameter tuning) 
+- LangChain (for RAG explanations)
+- Pinecone (vector Database)
 - Streamlit (interactive web application & deployment)
+- Hugging Face(Model deployment)
 
 ## Quick glance at the results
 
@@ -93,12 +102,13 @@ Top 3 models
 
 | Model     	         |    AUC-ROC score     |
 |----------------------|----------------------|
-| LightGBM(tuned)      | 72.57% 	            |
-| XGboost  (tuned)     | 72.42% 	            |
-| Logistic Regression  | 69.80% 	            |
+| LightGBM(tuned)      | 72.53% 	            |
+| XGboost  (tuned)     | 72.56% 	            |
+| LightGBM(Baseline)   | 72.08% 	            |
 
 
-- ***The final model used is: LightGBM***
+- ***The final model used is: LightGBM because it maximizes recall, catching a larger fraction of potential defaults.***
+
 - ***Metrics used: Recall, AUC-ROC, AUC-PR, Precision,	F1-score, KS, Gini***
 
 
@@ -117,8 +127,9 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 
 **What I found:**
 - Based on the analysis in this project it was found that loan amount, existing debt ratio, and age were the strongest predictors of default
-- Hyperparameter tuning barely helped improve the model performance, for example XGBoost went from 0.722349 to 0.724171 AUC and it took over 30 minutes to train. This suggests that features matter more than tuning
-- For imbalanced data, AUC-ROC matters way more than accuracy, and the 0.5 threshold doesn't work (except for logistic regression), the optimal threshold was 0.121
+- Hyperparameter tuning barely helped improve the model performance. This suggests that features matter more than tuning
+
+- For imbalanced data, AUC-ROC matters way more than accuracy, and the 0.5 threshold doesn't hold up. For example for Logistic Regression, the optimal threshold was 0.121
 
 **Recommendations:**
 - Recommendation would be to focus more on the loan amount when deciding since they carry the most risk and also accept that precision will be low, you'll reject some good customers to catch defaults
@@ -139,7 +150,7 @@ Credit risk data is very imbalanced, so ROC-AUC is best here as it measures how 
 credit-risk-model/
 ├── assets/                          # Images used in the README 
 │   ├── confusion_matrix_lgbm_tuned.png
-│   ├── Credit_img.png
+│   ├── credit.gif
 │   ├── roc_curve.png
 │   ├── shap_summary_bar.png
 │   └── target_dist.png
