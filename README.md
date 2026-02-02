@@ -68,7 +68,7 @@ The trained LightGBM model is deployed as an interactive web application where y
 
 <picture>
   <source srcset="assets/credit.gif" type="image/gif">
-  <img src="assets/Credit_img.png" alt="App Demo Dashboard showing Credit Risk metrics">
+  <img src="assets/capture.png" alt="App Demo Dashboard showing Credit Risk metrics">
 </picture>
 
 ## Tech Stack
